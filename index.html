@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+
 </head>
 <body>
     <div class="container">
@@ -106,6 +106,32 @@
                                 <div class="status-item">
                                     <span class="status-label">时间:</span>
                                     <span class="status-value" id="timeDisplay">0:00 / 0:00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="upload-section">
+                            <h3><i class="fas fa-upload"></i> 本地上传音乐</h3>
+                            <div class="upload-controls">
+                                <input type="file" id="musicFileInput" accept="audio/*" style="display: none;">
+                                <button id="selectFileBtn" class="btn btn-secondary">
+                                    <i class="fas fa-folder-open"></i> 选择音乐文件
+                                </button>
+                                <button id="uploadFileBtn" class="btn btn-primary" disabled>
+                                    <i class="fas fa-upload"></i> 上传并添加
+                                </button>
+                                <button id="clearUploadsBtn" class="btn btn-secondary">
+                                    <i class="fas fa-trash"></i> 清除所有上传
+                                </button>
+                                <div class="file-info">
+                                    <span id="selectedFileName">未选择文件</span>
+                                    <span id="fileSize">-</span>
+                                </div>
+                            </div>
+                            <div class="uploaded-tracks">
+                                <h4>已上传的音乐 <span id="uploadedCount">(0)</span></h4>
+                                <div class="tracks-list" id="uploadedTracksList">
+                                    <div class="empty-message">暂无上传的音乐</div>
                                 </div>
                             </div>
                         </div>
