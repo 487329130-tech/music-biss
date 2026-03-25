@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐指挥家 - 手势控制音乐播放</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-music"></i> 音乐指挥家</h1>
+            <p class="subtitle">通过手势控制音乐播放 - 像指挥家一样挥动你的双手</p>
+        </header>
+
+        <main>
+            <div class="content-wrapper">
+                <div class="left-panel">
+                    <div class="video-section">
+                        <h2><i class="fas fa-video"></i> 摄像头画面</h2>
+                        <div class="video-container">
+                            <video class="input-video" autoplay playsinline></video>
+                            <canvas class="output-canvas"></canvas>
+                        </div>
+                        <div class="video-controls">
+                            <button id="startCamera" class="btn btn-primary">
+                                <i class="fas fa-play"></i> 启动摄像头
+                            </button>
+                            <button id="stopCamera" class="btn btn-secondary" disabled>
+                                <i class="fas fa-stop"></i> 停止摄像头
+                            </button>
+                            <div class="camera-status">
+                                <span id="cameraStatusText">摄像头未启动</span>
+                                <div class="status-indicator" id="cameraStatusIndicator"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="gesture-info">
+                        <h2><i class="fas fa-hand-paper"></i> 手势识别状态</h2>
+                        <div class="gesture-display">
+                            <div class="gesture-icon" id="gestureIcon">
+                                <i class="fas fa-question-circle"></i>
+                            </div>
+                            <div class="gesture-details">
+                                <h3 id="gestureName">等待手势...</h3>
+                                <p id="gestureDescription">请启动摄像头并做出手势</p>
+                            </div>
+                        </div>
+                        <div class="landmarks-info">
+                            <h4>手部关键点检测</h4>
+                            <div class="landmarks-stats">
+                                <div class="stat">
+                                    <span class="stat-label">检测到的手</span>
+                                    <span class="stat-value" id="handsCount">0</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">置信度</span>
+                                    <span class="stat-value" id="confidence">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="right-panel">
+                    <div class="music-controls">
+                        <h2><i class="fas fa-compact-disc"></i> 音乐控制</h2>
+                        <div class="music-player">
+                            <div class="track-info">
+                                <h3 id="trackTitle">示例音乐</h3>
+                                <p id="trackArtist">手势控制演示</p>
+                            </div>
+                            <div class="player-controls">
+                                <button id="playPause" class="btn btn-control" disabled>
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <button id="stopMusic" class="btn btn-control" disabled>
+                                    <i class="fas fa-stop"></i>
+                                </button>
+                                <button id="prevTrack" class="btn btn-control" disabled>
+                                    <i class="fas fa-backward"></i>
+                                </button>
+                                <button id="nextTrack" class="btn btn-control" disabled>
+                                    <i class="fas fa-forward"></i>
+                                </button>
+                            </div>
+                            <div class="volume-control">
+                                <label for="volumeSlider"><i class="fas fa-volume-up"></i> 音量</label>
+                                <input type="range" id="volumeSlider" min="0" max="100" value="70" disabled>
+                                <span id="volumeValue">70%</span>
+                            </div>
+                            <div class="playback-control">
+                                <label for="speedSlider"><i class="fas fa-tachometer-alt"></i> 播放速度</label>
+                                <input type="range" id="speedSlider" min="50" max="200" value="100" disabled>
+                                <span id="speedValue">1.0x</span>
+                            </div>
+                            <div class="music-status">
+                                <div class="status-item">
+                                    <span class="status-label">状态:</span>
+                                    <span class="status-value" id="musicStatus">未加载</span>
+                                </div>
+                                <div class="status-item">
+                                    <span class="status-label">时间:</span>
+                                    <span class="status-value" id="timeDisplay">0:00 / 0:00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="gesture-mapping">
+                            <h3><i class="fas fa-hands"></i> 手势映射</h3>
+                            <ul class="gesture-list">
+                                <li>
+                                    <div class="gesture-item">
+                                        <div class="gesture-symbol">✋</div>
+                                        <div class="gesture-desc">
+                                            <strong>张开手掌</strong> - 播放/继续播放
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="gesture-item">
+                                        <div class="gesture-symbol">✊</div>
+                                        <div class="gesture-desc">
+                                            <strong>握拳</strong> - 暂停播放
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="gesture-item">
+                                        <div class="gesture-symbol">👆👇</div>
+                                        <div class="gesture-desc">
+                                            <strong>食指上下移动</strong> - 控制音量
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="gesture-item">
+                                        <div class="gesture-symbol">👈👉</div>
+                                        <div class="gesture-desc">
+                                            <strong>手左右移动</strong> - 控制播放速度
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="gesture-item">
+                                        <div class="gesture-symbol">✌️</div>
+                                        <div class="gesture-desc">
+                                            <strong>胜利手势 (V字)</strong> - 切换曲目
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="instructions">
+                        <h2><i class="fas fa-info-circle"></i> 使用说明</h2>
+                        <ol>
+                            <li>点击"启动摄像头"按钮，允许网站访问你的摄像头</li>
+                            <li>将手放在摄像头前，确保光线充足</li>
+                            <li>使用不同的手势来控制音乐播放：</li>
+                            <ul>
+                                <li><strong>张开手掌</strong>: 播放或继续播放音乐</li>
+                                <li><strong>握拳</strong>: 暂停音乐</li>
+                                <li><strong>食指上下移动</strong>: 调整音量（上提高，下降低）</li>
+                                <li><strong>手左右移动</strong>: 调整播放速度（左减慢，右加快）</li>
+                                <li><strong>胜利手势 (V字)</strong>: 切换到下一首曲目</li>
+                            </ul>
+                            <li>你也可以使用屏幕上的按钮进行手动控制</li>
+                            <li>点击"停止摄像头"可关闭摄像头</li>
+                        </ol>
+                        <div class="note">
+                            <p><strong>注意:</strong> 确保你的手在摄像头画面中清晰可见，避免快速移动以获得最佳识别效果。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>音乐指挥家 &copy; 2023 - 使用 MediaPipe 和 Web Audio API 构建</p>
+            <p class="footer-links">
+                <a href="https://mediapipe.dev" target="_blank">MediaPipe</a> |
+                <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API" target="_blank">Web Audio API</a> |
+                <a href="https://github.com" target="_blank">GitHub</a>
+            </p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
